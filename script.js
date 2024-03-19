@@ -2,13 +2,17 @@
 var stratagems = undefined;
 
 var xhr = new XMLHttpRequest();
-xhr.open(method='GET', url='./data/HD2-Sequences.json', async=false); // false indicates synchronous request
+xhr.open(
+    (method = "GET"),
+    (url = "./data/HD2-Sequences.json"),
+    (async = false)
+); // false indicates synchronous request
 xhr.send();
 
 if (xhr.status === 200) {
     stratagems = xhr.responseText;
 } else {
-    console.error('Error reading file:', xhr.statusText);
+    console.error("Error reading file:", xhr.statusText);
 }
 
 stratagems = JSON.parse(stratagems);
@@ -28,10 +32,10 @@ addMainGameListener();
 let gpPollInterval;
 const gpPollRate = 1000;
 const gpButtonToKeyMap = {
-    12: "KeyW", // Up
-    13: "KeyS", // Down
-    14: "KeyA", // Left
-    15: "KeyD"  // Right
+    12: "W", // Up
+    13: "S", // Down
+    14: "A", // Left
+    15: "D", // Right
 };
 
 // Poll for gamepad connection
@@ -78,10 +82,13 @@ var sfxDown = new Audio("./data/Sounds/1_D.mp3");
 var sfxLeft = new Audio("./data/Sounds/2_L.mp3");
 var sfxRight = new Audio("./data/Sounds/3_R.mp3");
 var sfxUp = new Audio("./data/Sounds/4_U.mp3");
-var sfxGameOver = [new Audio("./data/Sounds/GameOver1.mp3"), new Audio("./data/Sounds/GameOver2.mp3")]
+var sfxGameOver = [
+    new Audio("./data/Sounds/GameOver1.mp3"),
+    new Audio("./data/Sounds/GameOver2.mp3"),
+];
 
 // Create global tracking variables
-var gameState = "initial" //initial, running, hitlag, over
+var gameState = "initial"; //initial, running, hitlag, over
 var currentSequenceIndex = 0;
 var currentRefreshIndex = 0;
 var currentArrowSequenceTags = undefined;
@@ -96,31 +103,32 @@ var completedStrategemsList = [];
 const CURRENT_STRATAGEM_LIST_LENGTH = 4; //dependent on the html, don't change without modifying html too
 var currentStratagemsList = [];
 var lastCheckedTime = undefined;
-var CONFIGPOPUP = document.getElementById('game-config-popup');
+var CONFIGPOPUP = document.getElementById("game-config-popup");
 var TEMPARROWKEYS = {};
 
 // initial state of custom config
-const storedArrowKeysConfig = localStorage.getItem("CONFIG.arrowKeys") ? JSON.parse(localStorage.getItem("CONFIG.arrowKeys")) : false;
+const storedArrowKeysConfig = localStorage.getItem("CONFIG.arrowKeys")
+    ? JSON.parse(localStorage.getItem("CONFIG.arrowKeys"))
+    : false;
+/** @type{{arrowKeys: { [index: string]: string }}} */
 const CONFIG = {};
 
-
-if(storedArrowKeysConfig) {
+if (storedArrowKeysConfig) {
     CONFIG.arrowKeys = storedArrowKeysConfig;
 } else {
     CONFIG.arrowKeys = {
-        up:"KeyW",
-        down:"KeyS",
-        left:"KeyA",
-        right:"KeyD"
-    }
+        up: "KeyW",
+        down: "KeyS",
+        left: "KeyA",
+        right: "KeyD",
+    };
 }
 
 // Show directional buttons if user is on mobile
-if(userIsMobile())
-    showMobileButtons();
+if (userIsMobile()) showMobileButtons();
 
 // Load first stratagems
-for(let i = 0; i < CURRENT_STRATAGEM_LIST_LENGTH; i++){
+for (let i = 0; i < CURRENT_STRATAGEM_LIST_LENGTH; i++) {
     currentStratagemsList.push(pickRandomStratagem());
 }
 
@@ -132,10 +140,10 @@ countDown();
 
 //~~~//
 
-function keypress(keyCode){
+function keypress(keyCode) {
     // Ignore invalid keypresses
     let sfx;
-    switch(keyCode){
+    switch (keyCode) {
         case "ArrowUp":
         case CONFIG.arrowKeys.up:
             sfx = sfxUp;
@@ -156,17 +164,17 @@ function keypress(keyCode){
             sfx = sfxRight;
             keyCode = "KeyD";
             break;
-        default: 
+        default:
             return;
     }
 
     //b
 
     //Route keypress to proper handling function
-    switch(gameState){
+    switch (gameState) {
         case "initial":
             gameState = "running";
-            // Exclusion of `break;` here is intentional. The first keypress of the game should apply to the sequence
+        // Exclusion of `break;` here is intentional. The first keypress of the game should apply to the sequence
         case "running":
             checkGameKeypress(keyCode, sfx);
             break;
@@ -178,14 +186,14 @@ function keypress(keyCode){
     }
 }
 
-function checkGameKeypress(keyCode, sfx){
+function checkGameKeypress(keyCode, sfx) {
     // Check the keypress against the current sequence
-    if(keyCode == currentArrowSequenceTags[currentSequenceIndex].code){
+    if (keyCode == currentArrowSequenceTags[currentSequenceIndex].code) {
         //Success, apply the success
         currentSequenceIndex++;
-        
-        //Check if that success completes the entire sequence. 
-        if(currentSequenceIndex == currentArrowSequenceTags.length){
+
+        //Check if that success completes the entire sequence.
+        if (currentSequenceIndex == currentArrowSequenceTags.length) {
             //Add time bonus and pause the countdown for the delay time
             timeRemaining += CORRECT_TIME_BONUS;
             gameState = "hitlag";
@@ -203,93 +211,102 @@ function checkGameKeypress(keyCode, sfx){
                 gameState = "running";
             }, NEW_STRATEGEM_TIMEOUT);
         }
-    }
-    else if (keyCode == currentArrowSequenceTags[0].code){
+    } else if (keyCode == currentArrowSequenceTags[0].code) {
         //Edge case; if they're wrong but their input is the same as the first code, reset to first.
         currentSequenceIndex = 1;
 
         //Play failure animation
         shakeArrows(FAILURE_SHAKE_TIME);
-    }
-    else{
+    } else {
         //Failure, reset progress
         currentSequenceIndex = 0;
 
         //Play failure animation
         shakeArrows(FAILURE_SHAKE_TIME);
-    }   
+    }
 
     updateArrowFilters(currentArrowSequenceTags, currentSequenceIndex);
 
     // Play/replay sound
-    sfx.paused ? sfx.play() : sfx.currentTime = 0;
+    sfx.paused ? sfx.play() : (sfx.currentTime = 0);
 }
 
-function checkRefreshKeypress(keyCode, sfx){
+function checkRefreshKeypress(keyCode, sfx) {
     // Check the keypress against the current sequence
-    if(keyCode == refreshArrowSequenceTags[currentRefreshIndex].code){
+    if (keyCode == refreshArrowSequenceTags[currentRefreshIndex].code) {
         //Success, apply the success
         currentRefreshIndex++;
-        
+
         //If that completes the entire sequence, reload the window after a short delay
-        if(currentRefreshIndex == refreshArrowSequenceTags.length){
+        if (currentRefreshIndex == refreshArrowSequenceTags.length) {
             setTimeout(() => {
-                window.location.reload()
+                window.location.reload();
             }, 300);
         }
     }
     updateArrowFilters(refreshArrowSequenceTags, currentRefreshIndex);
 
     // Play/replay sound
-    sfx.paused ? sfx.play() : sfx.currentTime = 0;
+    sfx.paused ? sfx.play() : (sfx.currentTime = 0);
 }
 
-function updateArrowFilters(arrowTags, index){
-    for(i = 0; i < arrowTags.length; i++){
-        arrowTags[i].setAttribute("class", i < index ? "arrow-complete-filter" : "arrow-incomplete-filter")
+function updateArrowFilters(arrowTags, index) {
+    for (i = 0; i < arrowTags.length; i++) {
+        arrowTags[i].setAttribute(
+            "class",
+            i < index ? "arrow-complete-filter" : "arrow-incomplete-filter"
+        );
     }
 }
 
-function shakeArrows(time){
-    document.getElementById("arrows-container").setAttribute("style", `animation: shake ${time/1000}s;`);
+function shakeArrows(time) {
+    document
+        .getElementById("arrows-container")
+        .setAttribute("style", `animation: shake ${time / 1000}s;`);
 
     setTimeout(() => {
         document.getElementById("arrows-container").removeAttribute("style");
     }, 200);
 }
 
-function refreshStratagemDisplay(){
-    for(let i in currentStratagemsList){
+function refreshStratagemDisplay() {
+    for (let i in currentStratagemsList) {
         // Show the stratagem's picture in the correct slot
         if (currentStratagemsList[i].image) {
-            document.getElementById(`stratagem-icon-${i}`).src = `./data/Images/Stratagem\ Icons/hd2/${currentStratagemsList[i].image}`;
-        }
-        else {
-            document.getElementById(`stratagem-icon-${i}`).src = `./data/Images/Stratagem\ Icons/hd2/placeholder.png`;
+            document.getElementById(
+                `stratagem-icon-${i}`
+            ).src = `./data/Images/Stratagem\ Icons/hd2/${currentStratagemsList[i].image}`;
+        } else {
+            document.getElementById(
+                `stratagem-icon-${i}`
+            ).src = `./data/Images/Stratagem\ Icons/hd2/placeholder.png`;
         }
     }
 
     // Show arrow icons for the current active stratagem
-    currentArrowSequenceTags = showArrowSequence(currentStratagemsList[0].sequence);
+    currentArrowSequenceTags = showArrowSequence(
+        currentStratagemsList[0].sequence
+    );
 
     // Show active stratagem name
-    document.getElementById("stratagem-name").innerHTML = currentStratagemsList[0].name;
+    document.getElementById("stratagem-name").innerHTML =
+        currentStratagemsList[0].name;
 }
 
-function pickRandomStratagem(){
+function pickRandomStratagem() {
     return stratagems[Math.floor(Math.random() * stratagems.length)];
 }
 
-function showArrowSequence(arrowSequence, arrowsContainer){
-    if(arrowsContainer == undefined)
+function showArrowSequence(arrowSequence, arrowsContainer) {
+    if (arrowsContainer == undefined)
         arrowsContainer = document.getElementById("arrows-container");
 
     // Remove all table elements of old arrows
-    arrowsContainer.innerHTML = '';
+    arrowsContainer.innerHTML = "";
 
     //Create new arrow elements
     let arrowTags = [];
-    for(arrow of arrowSequence){
+    for (arrow of arrowSequence) {
         let td = document.createElement("td");
         let img = document.createElement("img");
         td.appendChild(img);
@@ -297,19 +314,19 @@ function showArrowSequence(arrowSequence, arrowsContainer){
         img.setAttribute("class", `arrow-incomplete-filter`);
 
         // Map filename to keycode
-        switch(arrow){
+        switch (arrow) {
             case "U":
                 img.code = "KeyW";
-            break;
+                break;
             case "D":
                 img.code = "KeyS";
-            break;
+                break;
             case "L":
                 img.code = "KeyA";
-            break;
+                break;
             case "R":
                 img.code = "KeyD";
-            break;
+                break;
         }
         arrowsContainer.appendChild(td);
         arrowTags.push(img);
@@ -317,16 +334,18 @@ function showArrowSequence(arrowSequence, arrowsContainer){
     return arrowTags;
 }
 
-function gameOver(){
+function gameOver() {
     //Stop the game
     gameState = "over";
 
     // Write score to readout
     let scoreReadout = document.getElementById("score-readout");
-    scoreReadout.innerHTML = `SCORE: ${completedStrategemsList.length}`
+    scoreReadout.innerHTML = `SCORE: ${completedStrategemsList.length}`;
 
     // Write completed strategems to readout
-    let stratagemReadout = document.getElementById("completed-strategems-readout");
+    let stratagemReadout = document.getElementById(
+        "completed-strategems-readout"
+    );
     stratagemReadout.innerHTML = stratagemListToString(true);
 
     // Show refresh arrow sequence
@@ -348,36 +367,39 @@ function gameOver(){
     sfxGameOver[Math.floor(Math.random() * sfxGameOver.length)].play();
 }
 
-function stratagemListToString(html, spamless){
+function stratagemListToString(html, spamless) {
     // Set direction characters based on argument
-    let up = "🡅", down = "🡇", left = "🡄", right = "🡆";
-    if(userIsMobile()){
-        up = "⬆️", down = "⬇️", left = "⬅️", right = "➡️";
+    let up = "🡅",
+        down = "🡇",
+        left = "🡄",
+        right = "🡆";
+    if (userIsMobile()) {
+        (up = "⬆️"), (down = "⬇️"), (left = "⬅️"), (right = "➡️");
     }
 
-    if(spamless){
-        up = "U", down = "D", left = "L", right = "R";
+    if (spamless) {
+        (up = "U"), (down = "D"), (left = "L"), (right = "R");
     }
 
     let re = "";
-    for(let stratagem of completedStrategemsList){
+    for (let stratagem of completedStrategemsList) {
         let line = `${stratagem.name}: `;
 
         //Put arrows
-        for(let direction of stratagem.sequence){
-            switch(direction){
+        for (let direction of stratagem.sequence) {
+            switch (direction) {
                 case "U":
-                    line += up; 
-                break;
+                    line += up;
+                    break;
                 case "D":
                     line += down;
-                break;
+                    break;
                 case "L":
                     line += left;
-                break;
+                    break;
                 case "R":
                     line += right;
-                break;
+                    break;
             }
         }
         line += html ? "<br>" : "\n";
@@ -387,15 +409,18 @@ function stratagemListToString(html, spamless){
     return re;
 }
 
-function copyShare(spamless){
+function copyShare(spamless) {
     // Gather text and write to clipboard
-    let output = `## My Stratagem Hero Online Score: ${completedStrategemsList.length}\n`
+    let output = `## My Stratagem Hero Online Score: ${completedStrategemsList.length}\n`;
     output += stratagemListToString(false, spamless);
-    output += "Do your part! Play Stratagem Hero Online: https://combustibletoast.github.io/"
+    output +=
+        "Do your part! Play Stratagem Hero Online: https://combustibletoast.github.io/";
     navigator.clipboard.writeText(output);
 
     //Change button's text
-    let buttonElement = document.getElementById(`share-button${spamless ? "-spamless" : ""}`);
+    let buttonElement = document.getElementById(
+        `share-button${spamless ? "-spamless" : ""}`
+    );
     let buttonOriginalText = buttonElement.innerHTML;
     buttonElement.innerHTML = "Copied!";
 
@@ -406,21 +431,19 @@ function copyShare(spamless){
     }, 3000);
 }
 
-async function countDown(){
-    if(gameState == "over")
-        return;
+async function countDown() {
+    if (gameState == "over") return;
 
-    if(timeRemaining <= 0){
+    if (timeRemaining <= 0) {
         gameOver();
         return;
     }
 
     //Calculate the true delta time since last check
-    //This should fix #2 
-    if(lastCheckedTime == undefined)
-        lastCheckedTime = Date.now();
+    //This should fix #2
+    if (lastCheckedTime == undefined) lastCheckedTime = Date.now();
     let now = Date.now();
-    let trueDeltaT = now-lastCheckedTime;
+    let trueDeltaT = now - lastCheckedTime;
     lastCheckedTime = now;
 
     // Immediately Set timeout for next countdown step
@@ -430,46 +453,48 @@ async function countDown(){
     }, COUNTDOWN_STEP);
 
     // Apply countdown if it's not paused
-    if(gameState != "hitlag" && gameState != "initial")
+    if (gameState != "hitlag" && gameState != "initial")
         timeRemaining -= trueDeltaT;
     updateTimeBar();
 }
 
-function updateTimeBar(){
-    let bar = document.getElementById("time-remaining-bar");  
-    let width = (timeRemaining/TOTAL_TIME) * 100;
+function updateTimeBar() {
+    let bar = document.getElementById("time-remaining-bar");
+    let width = (timeRemaining / TOTAL_TIME) * 100;
     // console.log(width);
-    bar.style.width = `${width}%`;   
+    bar.style.width = `${width}%`;
 }
 
-async function sleep(ms){
-    await new Promise(r => setTimeout(r, ms));
+async function sleep(ms) {
+    await new Promise((r) => setTimeout(r, ms));
 }
 
 function userIsMobile() {
-    return navigator.userAgent.match(/Android/i)
-    || navigator.userAgent.match(/webOS/i)
-    || navigator.userAgent.match(/iPhone/i)
-    || navigator.userAgent.match(/iPad/i)
-    || navigator.userAgent.match(/iPod/i)
-    || navigator.userAgent.match(/BlackBerry/i)
-    || navigator.userAgent.match(/Windows Phone/i);
+    return (
+        navigator.userAgent.match(/Android/i) ||
+        navigator.userAgent.match(/webOS/i) ||
+        navigator.userAgent.match(/iPhone/i) ||
+        navigator.userAgent.match(/iPad/i) ||
+        navigator.userAgent.match(/iPod/i) ||
+        navigator.userAgent.match(/BlackBerry/i) ||
+        navigator.userAgent.match(/Windows Phone/i)
+    );
 }
 
 function showMobileButtons() {
     container = document.getElementById("mobile-button-container");
-    
+
     container.removeAttribute("hidden");
     container.style.visibility = "visible";
 }
 
-function configPopupInputListener(event) {
-    //this limits the input charater length to 1 char
-    event.target.value = event.data.toUpperCase();
-}
 function configPopupButtonListener(event) {
-    let actionTypes = ["game-config--save", "game-config--close", "game-config--open"];
-    let foundType = actionTypes.find(actionType => {
+    let actionTypes = [
+        "game-config--save",
+        "game-config--close",
+        "game-config--open",
+    ];
+    let foundType = actionTypes.find((actionType) => {
         return event.target.closest(`[data-action-type="${actionType}"]`);
     });
     let foundButton = event.target.closest(`[data-action-type="${foundType}"]`);
@@ -479,7 +504,7 @@ function configPopupButtonListener(event) {
             case "game-config--save":
                 //save controls
                 configSaveArrowKeys();
-                //NOTE: This is a intentional missing break as i want both the save and the popup close to happen due to there not being any more settings here
+            //NOTE: This is a intentional missing break as i want both the save and the popup close to happen due to there not being any more settings here
             case "game-config--close":
             case "game-config--open":
                 //close popup
@@ -499,26 +524,14 @@ function configPopupKeydownListener(event) {
 
     if (activeElement.tagName == "INPUT") {
         let excludedKeys = ["TAB", "ALT"];
-        if (!excludedKeys.find((keyCode) => event.code.toUpperCase().includes(keyCode))) {
+        if (
+            !excludedKeys.find((keyCode) =>
+                event.code.toUpperCase().includes(keyCode)
+            )
+        ) {
             TEMPARROWKEYS[activeElement.name] = event.code;
         }
     }
-}
-
-
-let configPopupEvents = [
-    ["input", configPopupInputListener],
-    ["keydown", configPopupKeydownListener]
-];
-function addConfigPopupListener() {
-    configPopupEvents.forEach((event)=>{
-        addEventListener(event[0], event[1]);
-    })
-}
-function removeConfigPopupListener() {
-    configPopupEvents.forEach((event)=>{
-        removeEventListener(event[0], event[1]);
-    })
 }
 
 function addMainGameListener() {
@@ -530,35 +543,57 @@ function removeMainGameListener() {
 }
 
 function toggleConfigPopup() {
-    let popupCurrentState = CONFIGPOPUP.classList.contains('active');
+    let popupCurrentState = CONFIGPOPUP.classList.contains("active");
 
     if (popupCurrentState == true) {
-        CONFIGPOPUP.classList.remove('active');
+        CONFIGPOPUP.classList.remove("active");
         addMainGameListener();
-        removeConfigPopupListener();
     } else {
-        CONFIGPOPUP.classList.add('active');
-        initaliseConfigPopupInputs();
+        CONFIGPOPUP.classList.add("active");
         removeMainGameListener();
-        addConfigPopupListener();
         TEMPARROWKEYS = Object.assign({}, CONFIG.arrowKeys);
     }
 }
 
-function getConfigPopupInputs() {
-    return CONFIGPOPUP.querySelectorAll('input[name][type=text]');
-}
-
-function initaliseConfigPopupInputs() {
-    let inputs = getConfigPopupInputs();
-
-    inputs.forEach((input)=>{
-        let inputKey = Object.keys(CONFIG.arrowKeys).find((key)=>{
-            return key.toLowerCase() == input.name.toLowerCase();
-        });
-        
-        if (inputKey) {
-            input.value = CONFIG.arrowKeys[inputKey].slice(-1).toUpperCase();
+function setupKeyConfigInput(/** @type{HTMLInputElement} */ elem) {
+    let recording = false;
+    elem.addEventListener("keydown", (ev) => {
+        if (!recording) {
+            if (ev.code == "Tab") return;
+            if (ev.code == "Enter") {
+                recording = true;
+                recordingDisplay.style.opacity = "100";
+            }
+        } else {
+            if (ev.code != "Escape") elem.value = ev.code;
+            recording = false;
+            recordingDisplay.style.opacity = "0";
         }
-    })
+        ev.preventDefault();
+    });
+    elem.addEventListener("input", (ev) => {
+        ev.preventDefault();
+    });
+    elem.addEventListener("blur", () => {
+        recording = false;
+        recordingDisplay.style.opacity = "0";
+    });
 }
+
+// Key Config Popup Input Configuration
+let inputs = CONFIGPOPUP.querySelectorAll("input[name][type=text]");
+/** @type{HTMLParagraphElement} */
+const recordingDisplay = document.querySelector(
+    "p.game-config-popup__recording"
+);
+
+inputs.forEach((input) => {
+    let inputKey = Object.keys(CONFIG.arrowKeys).find((key) => {
+        return key.toLowerCase() == input.name.toLowerCase();
+    });
+
+    if (inputKey) {
+        input.value = CONFIG.arrowKeys[inputKey];
+        setupKeyConfigInput(input);
+    }
+});

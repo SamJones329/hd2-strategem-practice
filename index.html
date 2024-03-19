@@ -146,6 +146,7 @@
             display: block;
             margin: auto;
         }
+
         .info {
             color: gray;
             text-align: center;
@@ -166,7 +167,8 @@
             margin-inline: auto;
             margin-top: 20px;
             border-radius: 40px 0 40px 0;
-            box-shadow: 9px 9px 23px 4px rgba(0,0,0,0.75);;
+            box-shadow: 9px 9px 23px 4px rgba(0, 0, 0, 0.75);
+            ;
         }
 
         #completed-strategems-readout {
@@ -205,19 +207,50 @@
         }
 
         @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
+            0% {
+                transform: translate(1px, 1px) rotate(0deg);
+            }
 
+            10% {
+                transform: translate(-1px, -2px) rotate(-1deg);
+            }
+
+            20% {
+                transform: translate(-3px, 0px) rotate(1deg);
+            }
+
+            30% {
+                transform: translate(3px, 2px) rotate(0deg);
+            }
+
+            40% {
+                transform: translate(1px, -1px) rotate(1deg);
+            }
+
+            50% {
+                transform: translate(-1px, 2px) rotate(-1deg);
+            }
+
+            60% {
+                transform: translate(-3px, 1px) rotate(0deg);
+            }
+
+            70% {
+                transform: translate(3px, 1px) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(-1px, -1px) rotate(1deg);
+            }
+
+            90% {
+                transform: translate(1px, 2px) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(1px, -2px) rotate(-1deg);
+            }
+        }
     </style>
 </head>
 
@@ -238,10 +271,14 @@
 
             <table class="stratagems-table" id="stratagems-table">
                 <tr>
-                    <td><img class="stratagem-icon" id="stratagem-icon-0" src="data/Images/stratagem Icons/Strat Resupply mk1.png"></td>
-                    <td><img class="stratagem-icon" id="stratagem-icon-1" src="data/Images/stratagem Icons/Strat Resupply mk1.png"></td>
-                    <td><img class="stratagem-icon" id="stratagem-icon-2" src="data/Images/stratagem Icons/Strat Resupply mk1.png"></td>
-                    <td><img class="stratagem-icon" id="stratagem-icon-3" src="data/Images/stratagem Icons/Strat Resupply mk1.png"></td>
+                    <td><img class="stratagem-icon" id="stratagem-icon-0"
+                            src="data/Images/stratagem Icons/Strat Resupply mk1.png"></td>
+                    <td><img class="stratagem-icon" id="stratagem-icon-1"
+                            src="data/Images/stratagem Icons/Strat Resupply mk1.png"></td>
+                    <td><img class="stratagem-icon" id="stratagem-icon-2"
+                            src="data/Images/stratagem Icons/Strat Resupply mk1.png"></td>
+                    <td><img class="stratagem-icon" id="stratagem-icon-3"
+                            src="data/Images/stratagem Icons/Strat Resupply mk1.png"></td>
                 </tr>
             </table>
 
@@ -267,20 +304,20 @@
                         <td><button onclick="keypress('ArrowRight')" class="mobile-button">🡆</button></td>
                     </tr>
                 </table>
-            </div>  
+            </div>
         </div>
 
         <div class="game-over-popup" id="game-over-popup" hidden="hidden">
             <h1 class="title" id="score-readout">SCORE: ##</h1>
             <p id="completed-strategems-readout"></p>
             <div>
-                
+
                 <button onclick="copyShare()" id="share-button">
                     Share your score!
                 </button>
 
                 <br>
-                
+
                 <button onclick="copyShare(true)" id="share-button-spamless">
                     Spam Filter Compatible Share
                 </button>
@@ -302,7 +339,10 @@
 
         <div class="game-config-popup-container" id="game-config-popup">
             <div class="game-config-popup">
-                <p class="game-config-popup__title">Change your keybinds</p>
+                <p class="game-config-popup__title">Change your keybinds (press enter on input to record input)</p>
+                <div class="game-config-popup__recording-container">
+                    <p class="game-config-popup__recording">Recording</p>
+                </div>
                 <div class="game-config-popup__key-bindings">
                     <div class="key-bind-container key-bind-container--up">
                         <p>
@@ -331,7 +371,8 @@
                 </div>
                 <div class="game-config-popup__action-buttons">
                     <button role="button" data-action-type="game-config--save" class="button save-button">save</button>
-                    <button role="button" data-action-type="game-config--close" class="button close-button">close</button>
+                    <button role="button" data-action-type="game-config--close"
+                        class="button close-button">close</button>
                 </div>
             </div>
         </div>
@@ -340,17 +381,26 @@
                 <button role="button" data-action-type="game-config--open" class="button">change keybinds</button>
             </div>
             <p class="larger-info">
-                Check out Helldivers 2 on <a href="https://store.steampowered.com/app/553850/HELLDIVERS_2/" target="_blank">Steam</a> and <a href="https://www.playstation.com/en-us/games/helldivers-2/" target="_blank">Playstation</a>!<br>
+                Check out Helldivers 2 on <a href="https://store.steampowered.com/app/553850/HELLDIVERS_2/"
+                    target="_blank">Steam</a> and <a href="https://www.playstation.com/en-us/games/helldivers-2/"
+                    target="_blank">Playstation</a>!<br>
             </p>
-            Made with 💖 by <a href="https://github.com/CombustibleToast" target="_blank">CombustibleToast</a><br> 
-            Additional contributions by 
-            <a href="https://github.com/CombustibleToast/StratagemHeroOnline/pulls?q=is%3Apr+author%3ASavageCore" target="_blank">SavageCore</a>, 
-            <a href="https://github.com/CombustibleToast/StratagemHeroOnline/pulls?q=is%3Apr+author%3Arrliu" target="_blank">rrliu</a>, 
-            <a href="https://github.com/CombustibleToast/StratagemHeroOnline/pulls?q=is%3Apr+author%3AAlexander-ilyin3" target="_blank">Alexander-ilyin3</a>, 
-            <a href="https://github.com/CombustibleToast/StratagemHeroOnline/pulls?q=is%3Apr+author%3AHAYD323" target="_blank">HAYD323</a>, 
-            and <a href="https://github.com/nvigneux/Helldivers-2-Stratagems-icons-svg" target="_blank">nvigneux</a> for the images. Thank you! <br>
+            Made with 💖 by <a href="https://github.com/CombustibleToast" target="_blank">CombustibleToast</a><br>
+            Additional contributions by
+            <a href="https://github.com/CombustibleToast/StratagemHeroOnline/pulls?q=is%3Apr+author%3ASavageCore"
+                target="_blank">SavageCore</a>,
+            <a href="https://github.com/CombustibleToast/StratagemHeroOnline/pulls?q=is%3Apr+author%3Arrliu"
+                target="_blank">rrliu</a>,
+            <a href="https://github.com/CombustibleToast/StratagemHeroOnline/pulls?q=is%3Apr+author%3AAlexander-ilyin3"
+                target="_blank">Alexander-ilyin3</a>,
+            <a href="https://github.com/CombustibleToast/StratagemHeroOnline/pulls?q=is%3Apr+author%3AHAYD323"
+                target="_blank">HAYD323</a>,
+            and <a href="https://github.com/nvigneux/Helldivers-2-Stratagems-icons-svg" target="_blank">nvigneux</a> for
+            the images. Thank you! <br>
             Play the original Helldivers 1 version <a href="Old/index.html">here</a>.<br>
-            View the source code <a href="https://github.com/CombustibleToast/StratagemHeroOnline" target="_blank">on Github</a> or report an issue <a href="https://github.com/CombustibleToast/StratagemHeroOnline/issues" target="_blank">here</a><br>
+            View the source code <a href="https://github.com/CombustibleToast/StratagemHeroOnline" target="_blank">on
+                Github</a> or report an issue <a href="https://github.com/CombustibleToast/StratagemHeroOnline/issues"
+                target="_blank">here</a><br>
             Not affiliated with Helldivers, Arrowhead Studios, or Playstation Studios. Please don't sue me :)<br>
         </div>
     </div>
